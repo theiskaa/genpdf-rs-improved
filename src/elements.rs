@@ -295,7 +295,13 @@ impl Paragraph {
 
     /// Adds a string with the given style to the end of this paragraph.
     pub fn push_styled(&mut self, s: impl Into<String>, style: impl Into<Style>) {
-        self.text.push(StyledString::new(s, style))
+        self.text.push(StyledString::new(s, style, None))
+    }
+
+    /// Adds a string with the given style to the end of this paragraph and returns the paragraph.
+    pub fn push_link(&mut self, text: impl Into<String>, url: impl Into<String>, style: Style) {
+        self.text
+            .push(StyledString::new(text, style.clone(), Some(url.into())));
     }
 
     /// Adds a string with the given style to the end of this paragraph and returns the paragraph.
@@ -354,7 +360,11 @@ impl Element for Paragraph {
 
             if let Some(mut section) = area.text_section(&context.font_cache, position, metrics) {
                 for s in line {
-                    section.print_str(&s.s, s.style)?;
+                    if let Some(url) = &s.link {
+                        section.add_link(&s.s, url.clone(), s.style)?;
+                    } else {
+                        section.print_str(&s.s, s.style)?;
+                    }
                     rendered_len += s.s.len();
                 }
                 rendered_len -= delta;

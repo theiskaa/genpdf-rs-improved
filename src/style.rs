@@ -374,14 +374,17 @@ pub struct StyledString {
     pub s: String,
     /// The style annotation.
     pub style: Style,
+    /// The link annotation.
+    pub link: Option<String>,
 }
 
 impl StyledString {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<String>, style: impl Into<Style>) -> StyledString {
+    pub fn new(s: impl Into<String>, style: impl Into<Style>, link: Option<String>) -> StyledString {
         StyledString {
             s: s.into(),
             style: style.into(),
+            link,
         }
     }
 
@@ -399,19 +402,19 @@ impl StyledString {
 
 impl From<String> for StyledString {
     fn from(s: String) -> StyledString {
-        StyledString::new(s, Style::new())
+        StyledString::new(s, Style::new(), None)
     }
 }
 
 impl<'a> From<&'a String> for StyledString {
     fn from(s: &'a String) -> StyledString {
-        StyledString::from(s.to_owned())
+        StyledString::new(s.to_owned(), Style::new(), None)
     }
 }
 
 impl<'a> From<&'a str> for StyledString {
     fn from(s: &'a str) -> StyledString {
-        StyledString::from(s.to_owned())
+        StyledString::new(s.to_owned(), Style::new(), None)
     }
 }
 
@@ -492,14 +495,17 @@ pub struct StyledCow<'s> {
     pub s: borrow::Cow<'s, str>,
     /// The style annotation.
     pub style: Style,
+    /// The link annotation.
+    pub link: Option<String>,
 }
 
 impl<'s> StyledCow<'s> {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<borrow::Cow<'s, str>>, style: impl Into<Style>) -> StyledCow<'s> {
+    pub fn new(s: impl Into<borrow::Cow<'s, str>>, style: impl Into<Style>, link: Option<String>) -> StyledCow<'s> {
         StyledCow {
             s: s.into(),
             style: style.into(),
+            link,
         }
     }
 
@@ -517,37 +523,37 @@ impl<'s> StyledCow<'s> {
 
 impl<'s> From<&'s str> for StyledCow<'s> {
     fn from(s: &'s str) -> StyledCow<'s> {
-        StyledCow::new(s, Style::new())
+        StyledCow::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<&'s String> for StyledCow<'s> {
     fn from(s: &'s String) -> StyledCow<'s> {
-        StyledCow::new(s, Style::new())
+        StyledCow::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<String> for StyledCow<'s> {
     fn from(s: String) -> StyledCow<'s> {
-        StyledCow::new(s, Style::new())
+        StyledCow::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<StyledStr<'s>> for StyledCow<'s> {
     fn from(s: StyledStr<'s>) -> StyledCow<'s> {
-        StyledCow::new(s.s, s.style)
+        StyledCow::new(s.s, s.style, None)
     }
 }
 
 impl<'s> From<&'s StyledString> for StyledCow<'s> {
     fn from(s: &'s StyledString) -> StyledCow<'s> {
-        StyledCow::new(&s.s, s.style)
+        StyledCow::new(&s.s, s.style, s.link.clone())
     }
 }
 
 impl<'s> From<StyledString> for StyledCow<'s> {
     fn from(s: StyledString) -> StyledCow<'s> {
-        StyledCow::new(s.s, s.style)
+        StyledCow::new(s.s, s.style, s.link.clone())
     }
 }
 

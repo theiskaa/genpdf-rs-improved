@@ -22,7 +22,7 @@ use std::io;
 use std::path;
 
 use derive_more::{
-    Add, AddAssign, Div, DivAssign, From, Into, Mul, MulAssign, Sub, SubAssign, Sum,
+    Add, AddAssign, Div, DivAssign, Into, Mul, MulAssign, Sub, SubAssign, Sum,
 };
 
 use error::Context as _;

@@ -1,0 +1,1 @@
+wrap::Wrapper<'_, '_, Map<std::collections::vec_deque::Iter<'_, StyledString>, fn(&StyledString) -> StyledStr<'_> {<&StyledString as Into<StyledStr<'_>>>::into}>>

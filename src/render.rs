@@ -628,6 +628,28 @@ impl<'p> Area<'p> {
     fn position(&self, position: Position) -> LayerPosition {
         LayerPosition::from_area(self, position)
     }
+
+    /// Adds a clickable link to the document.
+    ///
+    /// The font cache must contain the PDF font for the font set in the style.  The position is
+    /// relative to the upper left corner of the area.
+    pub fn add_link<S: AsRef<str>>(
+        &self,
+        font_cache: &fonts::FontCache,
+        position: Position,
+        style: Style,
+        text: S,
+        uri: S,
+    ) -> Result<bool, Error> {
+        if let Some(mut section) =
+            self.text_section(font_cache, position, style.metrics(font_cache))
+        {
+            section.add_link(text, uri, style)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
 }
 
 /// A text section that is drawn on an area of a PDF layer.
@@ -735,6 +757,58 @@ impl<'f, 'p> TextSection<'f, 'p> {
         self.area
             .layer
             .write_positioned_codepoints(positions, codepoints);
+        Ok(())
+    }
+
+    /// Adds a clickable link with the given text, URI, and style.
+    ///
+    /// The font cache for this text section must contain the PDF font for the given style.
+    pub fn add_link(
+        &mut self,
+        text: impl AsRef<str>,
+        uri: impl AsRef<str>,
+        style: Style,
+    ) -> Result<(), Error> {
+        let text = text.as_ref();
+        let uri = uri.as_ref();
+    
+        // Calculate the width of the text
+        let font = style.font(self.font_cache);
+        let text_width = font.str_width(self.font_cache, text, style.font_size());
+    
+        // Calculate the correct positions for the annotation
+        let start_pos = LayerPosition(Position::new(self.area.origin.x, self.area.origin.y));
+        let end_pos = LayerPosition(Position::new(
+            self.area.origin.x + text_width,
+            self.area.origin.y + self.metrics.line_height,
+        ));
+    
+        let start_user_space = UserSpacePosition::from_layer(&self.area.layer, start_pos);
+        let end_user_space = UserSpacePosition::from_layer(&self.area.layer, end_pos);
+    
+        // Add the link annotation
+        let link_annotation = printpdf::LinkAnnotation::new(
+            printpdf::Rect::new(
+                printpdf::Mm(start_user_space.x.0),
+                printpdf::Mm(start_user_space.y.0),
+                printpdf::Mm(end_user_space.x.0),
+                printpdf::Mm(end_user_space.y.0),
+            ),
+            None,
+            None,
+            printpdf::Actions::uri(uri.to_string()),
+            None,
+        );
+    
+        self.area
+            .layer
+            .data
+            .layer
+            .add_link_annotation(link_annotation);
+    
+        // Now print the text
+        self.print_str(text, style)?;
+    
         Ok(())
     }
 }
