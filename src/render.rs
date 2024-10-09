@@ -306,6 +306,11 @@ impl<'p> Layer<'p> {
         Layer { page, data }
     }
 
+    /// Returns the underlying `PdfLayerReference` for this layer.
+    pub fn layer(&self) -> &printpdf::PdfLayerReference {
+        &self.data.layer
+    }
+
     /// Returns the next layer of this page.
     ///
     /// If this layer is not the last layer, the existing next layer is used.  If it is the last
@@ -419,6 +424,11 @@ impl<'p> Layer<'p> {
     /// position that is relative to the lower left corner of the layer (as used by `printpdf`).
     fn transform_position(&self, position: LayerPosition) -> UserSpacePosition {
         UserSpacePosition::from_layer(self, position)
+    }
+
+    /// Adds a link annotation to the layer.
+    pub fn add_annotation(&mut self, annotation: printpdf::LinkAnnotation) {
+        self.data.layer.add_link_annotation(annotation);
     }
 }
 
@@ -771,44 +781,55 @@ impl<'f, 'p> TextSection<'f, 'p> {
     ) -> Result<(), Error> {
         let text = text.as_ref();
         let uri = uri.as_ref();
-    
+
         // Calculate the width of the text
         let font = style.font(self.font_cache);
         let text_width = font.str_width(self.font_cache, text, style.font_size());
-    
-        // Calculate the correct positions for the annotation
-        let start_pos = LayerPosition(Position::new(self.area.origin.x, self.area.origin.y));
-        let end_pos = LayerPosition(Position::new(
-            self.area.origin.x + text_width,
-            self.area.origin.y + self.metrics.line_height,
-        ));
-    
-        let start_user_space = UserSpacePosition::from_layer(&self.area.layer, start_pos);
-        let end_user_space = UserSpacePosition::from_layer(&self.area.layer, end_pos);
-    
+
+        // Get the PDF font
+        let pdf_font = self
+            .font_cache
+            .get_pdf_font(font)
+            .expect("Could not find PDF font in font cache");
+
+        // Calculate the correct positions for the text and annotation
+        let start_x = self.area.origin.x;
+        let start_y = self.area.origin.y + self.metrics.ascent;
+        let end_x = start_x + text_width;
+        let end_y = start_y + self.metrics.line_height;
+
+        // Use text directly on the layer
+        self.area.layer.data.layer.use_text(
+            text,
+            style.font_size() as f32,
+            printpdf::Mm(start_x.0),
+            printpdf::Mm(start_y.0),
+            pdf_font,
+        );
+
         // Add the link annotation
         let link_annotation = printpdf::LinkAnnotation::new(
             printpdf::Rect::new(
-                printpdf::Mm(start_user_space.x.0),
-                printpdf::Mm(start_user_space.y.0),
-                printpdf::Mm(end_user_space.x.0),
-                printpdf::Mm(end_user_space.y.0),
+                printpdf::Mm(start_x.0),
+                printpdf::Mm(start_y.0),
+                printpdf::Mm(end_x.0),
+                printpdf::Mm(end_y.0),
             ),
             None,
             None,
             printpdf::Actions::uri(uri.to_string()),
             None,
         );
-    
+
         self.area
             .layer
             .data
             .layer
             .add_link_annotation(link_annotation);
-    
-        // Now print the text
-        self.print_str(text, style)?;
-    
+
+        // Update the cursor position
+        self.area.origin.x += text_width;
+
         Ok(())
     }
 }

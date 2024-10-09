@@ -299,9 +299,10 @@ impl Paragraph {
     }
 
     /// Adds a string with the given style to the end of this paragraph and returns the paragraph.
-    pub fn push_link(&mut self, text: impl Into<String>, url: impl Into<String>, style: Style) {
-        self.text
-            .push(StyledString::new(text, style.clone(), Some(url.into())));
+    pub fn push_link(&mut self, text: impl Into<String>, url: impl Into<String>, style: impl Into<Style>) -> &mut Self {
+        let styled = StyledString::new(text, style, Some(url.into()));
+        self.text.push(styled);
+        self
     }
 
     /// Adds a string with the given style to the end of this paragraph and returns the paragraph.
