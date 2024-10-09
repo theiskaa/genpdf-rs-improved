@@ -1,0 +1,11 @@
+/Users/i.shahverdiev/dev/projects/genpdf-rs/target/debug/deps/libpom-c17de4ad7334a324.rmeta: /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/lib.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/range.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/result.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/set.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/parser.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/char_class.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/utf8.rs
+
+/Users/i.shahverdiev/dev/projects/genpdf-rs/target/debug/deps/pom-c17de4ad7334a324.d: /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/lib.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/range.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/result.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/set.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/parser.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/char_class.rs /Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/utf8.rs
+
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/lib.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/range.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/result.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/set.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/parser.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/char_class.rs:
+/Users/i.shahverdiev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/pom-3.4.0/src/utf8.rs:

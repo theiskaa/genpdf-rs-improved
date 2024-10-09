@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=dictionaries/en-us.standard.bincode
+cargo:rerun-if-changed=build.rs

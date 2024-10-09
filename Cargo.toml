@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2020-2021 Robin Krahl <robin.krahl@ireas.org>
+# SPDX-License-Identifier: CC0-1.0
+
+[package]
+name = "genpdf"
+version = "0.2.0"
+authors = ["Robin Krahl <robin.krahl@ireas.org>", "Ismael Sh <me@theiskaa.com>"]
+edition = "2018"
+description = "User-friendly PDF generator written in pure Rust"
+homepage = "https://github.com/theiskaa/genpdf-rs-improved"
+repository = "https://github.com/theiskaa/genpdf-rs-improved"
+keywords = ["pdf", "text", "layout"]
+categories = ["text-processing"]
+license = "Apache-2.0 OR MIT"
+exclude = [".builds/*"]
+readme = "README.md"
+
+[dependencies]
+lopdf = "0.26"
+rusttype = "0.8"
+
+[dependencies.image]
+version = "0.23.12"
+default-features = false
+optional = true
+
+[dependencies.hyphenation]
+version = "0.8"
+optional = true
+
+[dependencies.printpdf]
+version = "0.7.0"
+default-features = false
+
+[dependencies.derive_more]
+version = "0.99"
+default-features = false
+features = ["add", "add_assign", "from", "into", "mul", "mul_assign", "sum"]
+
+[dev-dependencies.float-cmp]
+version = "0.8"
+default-features = false
+features = ["std"]
+
+[dev-dependencies.hyphenation]
+version = "0.8"
+features = ["embed_en-us"]
+
+[features]
+default = []
+images = ["image", "printpdf/embedded_images"]
+
+[package.metadata.docs.rs]
+all-features = true
