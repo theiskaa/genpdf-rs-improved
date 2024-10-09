@@ -180,7 +180,7 @@ impl<I: Iterator<Item = style::StyledString>> Iterator for Words<I> {
             let n = s.s.find(' ').map(|i| i + 1).unwrap_or_else(|| s.s.len());
             let mut tmp = s.s.split_off(n);
             mem::swap(&mut tmp, &mut s.s);
-            Some(style::StyledString::new(tmp, s.style))
+            Some(style::StyledString::new(tmp, s.style, s.link.clone()))
         } else {
             None
         }
