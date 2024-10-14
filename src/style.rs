@@ -436,14 +436,17 @@ pub struct StyledStr<'s> {
     pub s: &'s str,
     /// The style annotation.
     pub style: Style,
+    /// The link annotation.
+    pub link: Option<&'s str>,
 }
 
 impl<'s> StyledStr<'s> {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: &'s str, style: impl Into<Style>) -> StyledStr<'s> {
+    pub fn new(s: &'s str, style: impl Into<Style>, link: Option<&'s str>) -> StyledStr<'s> {
         StyledStr {
             s,
             style: style.into(),
+            link,
         }
     }
 
@@ -461,19 +464,19 @@ impl<'s> StyledStr<'s> {
 
 impl<'s> From<&'s str> for StyledStr<'s> {
     fn from(s: &'s str) -> StyledStr<'s> {
-        StyledStr::new(s, Style::new())
+        StyledStr::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<&'s String> for StyledStr<'s> {
     fn from(s: &'s String) -> StyledStr<'s> {
-        StyledStr::new(s, Style::new())
+        StyledStr::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<&'s StyledString> for StyledStr<'s> {
     fn from(s: &'s StyledString) -> StyledStr<'s> {
-        StyledStr::new(&s.s, s.style)
+        StyledStr::new(&s.s, s.style, s.link.as_deref())
     }
 }
 
@@ -541,7 +544,7 @@ impl<'s> From<String> for StyledCow<'s> {
 
 impl<'s> From<StyledStr<'s>> for StyledCow<'s> {
     fn from(s: StyledStr<'s>) -> StyledCow<'s> {
-        StyledCow::new(s.s, s.style, None)
+        StyledCow::new(s.s, s.style, s.link.map(|s| s.to_owned()))
     }
 }
 

@@ -50,6 +50,8 @@ use std::mem;
 use crate::error::{Error, ErrorKind};
 use crate::fonts;
 use crate::render;
+use crate::style;
+use crate::style::Color;
 use crate::style::{LineStyle, Style, StyledString};
 use crate::wrap;
 use crate::{Alignment, Context, Element, Margins, Mm, Position, RenderResult, Size};
@@ -299,7 +301,12 @@ impl Paragraph {
     }
 
     /// Adds a string with the given style to the end of this paragraph and returns the paragraph.
-    pub fn push_link(&mut self, text: impl Into<String>, url: impl Into<String>, style: impl Into<Style>) -> &mut Self {
+    pub fn push_link(
+        &mut self,
+        text: impl Into<String>,
+        url: impl Into<String>,
+        style: impl Into<Style>,
+    ) -> &mut Self {
         let styled = StyledString::new(text, style, Some(url.into()));
         self.text.push(styled);
         self
@@ -347,12 +354,11 @@ impl Element for Paragraph {
             self.words = wrap::Words::new(mem::take(&mut self.text)).collect();
         }
 
-        let words = self.words.iter().map(Into::into);
+        let words = self.words.iter().map(|s| style::StyledStr::new(&s.s, s.style, s.link.as_deref()));
         let mut rendered_len = 0;
         let mut wrapper = wrap::Wrapper::new(words, context, area.size().width);
         for (line, delta) in &mut wrapper {
             let width = line.iter().map(|s| s.width(&context.font_cache)).sum();
-            // Calculate the maximum line height
             let metrics = line
                 .iter()
                 .map(|s| s.style.metrics(&context.font_cache))
@@ -386,7 +392,7 @@ impl Element for Paragraph {
             ));
         }
 
-        // Remove the rendered data from self.words so that we don’t render it again on the next
+        // Remove the rendered data from self.words so that we don't render it again on the next
         // call to render.
         while rendered_len > 0 && !self.words.is_empty() {
             if self.words[0].s.len() <= rendered_len {

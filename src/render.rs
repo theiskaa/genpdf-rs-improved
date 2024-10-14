@@ -796,7 +796,7 @@ impl<'f, 'p> TextSection<'f, 'p> {
         let start_x = self.area.origin.x;
         let start_y = self.area.origin.y + self.metrics.ascent;
         let end_x = start_x + text_width;
-        let end_y = start_y + self.metrics.line_height;
+        let end_y = start_y - self.metrics.ascent;
 
         // Use text directly on the layer
         self.area.layer.data.layer.use_text(
@@ -811,9 +811,9 @@ impl<'f, 'p> TextSection<'f, 'p> {
         let link_annotation = printpdf::LinkAnnotation::new(
             printpdf::Rect::new(
                 printpdf::Mm(start_x.0),
-                printpdf::Mm(start_y.0),
-                printpdf::Mm(end_x.0),
                 printpdf::Mm(end_y.0),
+                printpdf::Mm(end_x.0),
+                printpdf::Mm(start_y.0),
             ),
             None,
             None,
