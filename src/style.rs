@@ -316,6 +316,17 @@ impl Style {
         metrics.line_height *= self.line_spacing();
         metrics
     }
+
+    /// Calculate the width of the given string with this style using the data in the given font
+    /// cache.
+    ///
+    /// If the font family is set, it must have been created by the given [`FontCache`][].
+    ///
+    /// [`FontCache`]: ../fonts/struct.FontCache.html
+    pub fn text_width(&self, font_cache: &fonts::FontCache, s: &str) -> Mm {
+        let font = self.font(font_cache);
+        font.str_width(font_cache, s, self.font_size())
+    }
 }
 
 impl From<Color> for Style {
@@ -380,7 +391,11 @@ pub struct StyledString {
 
 impl StyledString {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<String>, style: impl Into<Style>, link: Option<String>) -> StyledString {
+    pub fn new(
+        s: impl Into<String>,
+        style: impl Into<Style>,
+        link: Option<String>,
+    ) -> StyledString {
         StyledString {
             s: s.into(),
             style: style.into(),
@@ -504,7 +519,11 @@ pub struct StyledCow<'s> {
 
 impl<'s> StyledCow<'s> {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<borrow::Cow<'s, str>>, style: impl Into<Style>, link: Option<String>) -> StyledCow<'s> {
+    pub fn new(
+        s: impl Into<borrow::Cow<'s, str>>,
+        style: impl Into<Style>,
+        link: Option<String>,
+    ) -> StyledCow<'s> {
         StyledCow {
             s: s.into(),
             style: style.into(),
