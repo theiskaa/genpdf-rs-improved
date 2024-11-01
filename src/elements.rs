@@ -51,7 +51,6 @@ use crate::error::{Error, ErrorKind};
 use crate::fonts;
 use crate::render;
 use crate::style;
-use crate::style::Color;
 use crate::style::{LineStyle, Style, StyledString};
 use crate::wrap;
 use crate::{Alignment, Context, Element, Margins, Mm, Position, RenderResult, Size};
