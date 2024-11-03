@@ -787,7 +787,6 @@ impl<'f, 'p> TextSection<'f, 'p> {
         let text = text.as_ref();
         let uri = uri.as_ref();
 
-        // Calculate kerning positions
         let kerning_positions: Vec<f32> = font.kerning(self.font_cache, text.chars());
 
         // Get current cursor position, including all accumulated offsets
@@ -795,12 +794,9 @@ impl<'f, 'p> TextSection<'f, 'p> {
             self.current_x_offset + self.cumulative_kerning,
             0.0,
         ));
+
         let pdf_pos = self.area.layer.transform_position(current_pos);
-
-        // Calculate text width
         let text_width = style.text_width(self.font_cache, text);
-
-        // Create annotation rectangle
         let rect = printpdf::Rect::new(
             printpdf::Mm(pdf_pos.x.0),                                     // left
             printpdf::Mm(pdf_pos.y.0 - font.ascent(style.font_size()).0),  // bottom
@@ -808,13 +804,12 @@ impl<'f, 'p> TextSection<'f, 'p> {
             printpdf::Mm(pdf_pos.y.0 + font.descent(style.font_size()).0), // top
         );
 
-        // Create and add the link annotation
         let annotation = printpdf::LinkAnnotation::new(
             rect,
-            Some(printpdf::BorderArray::default()),
-            None,
+            Some(printpdf::BorderArray::Solid([0.0, 0.0, 0.0])), // No border
+            Some(printpdf::ColorArray::Transparent),             // Transparent color
             printpdf::Actions::uri(uri.to_string()),
-            Some(printpdf::HighlightingMode::Invert),
+            None,
         );
         self.area.layer.add_annotation(annotation);
 
@@ -827,7 +822,6 @@ impl<'f, 'p> TextSection<'f, 'p> {
             self.is_first = false;
         }
 
-        // Convert kerning positions for text rendering
         let positions = kerning_positions
             .clone()
             .into_iter()
@@ -847,7 +841,6 @@ impl<'f, 'p> TextSection<'f, 'p> {
         self.area.layer.set_fill_color(style.color());
         self.set_font(pdf_font, style.font_size());
 
-        // Render the text
         self.area
             .layer
             .write_positioned_codepoints(positions, codepoints);
