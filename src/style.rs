@@ -316,6 +316,17 @@ impl Style {
         metrics.line_height *= self.line_spacing();
         metrics
     }
+
+    /// Calculate the width of the given string with this style using the data in the given font
+    /// cache.
+    ///
+    /// If the font family is set, it must have been created by the given [`FontCache`][].
+    ///
+    /// [`FontCache`]: ../fonts/struct.FontCache.html
+    pub fn text_width(&self, font_cache: &fonts::FontCache, s: &str) -> Mm {
+        let font = self.font(font_cache);
+        font.str_width(font_cache, s, self.font_size())
+    }
 }
 
 impl From<Color> for Style {
@@ -380,7 +391,11 @@ pub struct StyledString {
 
 impl StyledString {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<String>, style: impl Into<Style>, link: Option<String>) -> StyledString {
+    pub fn new(
+        s: impl Into<String>,
+        style: impl Into<Style>,
+        link: Option<String>,
+    ) -> StyledString {
         StyledString {
             s: s.into(),
             style: style.into(),
@@ -436,14 +451,17 @@ pub struct StyledStr<'s> {
     pub s: &'s str,
     /// The style annotation.
     pub style: Style,
+    /// The link annotation.
+    pub link: Option<&'s str>,
 }
 
 impl<'s> StyledStr<'s> {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: &'s str, style: impl Into<Style>) -> StyledStr<'s> {
+    pub fn new(s: &'s str, style: impl Into<Style>, link: Option<&'s str>) -> StyledStr<'s> {
         StyledStr {
             s,
             style: style.into(),
+            link,
         }
     }
 
@@ -461,19 +479,19 @@ impl<'s> StyledStr<'s> {
 
 impl<'s> From<&'s str> for StyledStr<'s> {
     fn from(s: &'s str) -> StyledStr<'s> {
-        StyledStr::new(s, Style::new())
+        StyledStr::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<&'s String> for StyledStr<'s> {
     fn from(s: &'s String) -> StyledStr<'s> {
-        StyledStr::new(s, Style::new())
+        StyledStr::new(s, Style::new(), None)
     }
 }
 
 impl<'s> From<&'s StyledString> for StyledStr<'s> {
     fn from(s: &'s StyledString) -> StyledStr<'s> {
-        StyledStr::new(&s.s, s.style)
+        StyledStr::new(&s.s, s.style, s.link.as_deref())
     }
 }
 
@@ -501,7 +519,11 @@ pub struct StyledCow<'s> {
 
 impl<'s> StyledCow<'s> {
     /// Creates a new styled string from the given string and style.
-    pub fn new(s: impl Into<borrow::Cow<'s, str>>, style: impl Into<Style>, link: Option<String>) -> StyledCow<'s> {
+    pub fn new(
+        s: impl Into<borrow::Cow<'s, str>>,
+        style: impl Into<Style>,
+        link: Option<String>,
+    ) -> StyledCow<'s> {
         StyledCow {
             s: s.into(),
             style: style.into(),
@@ -541,7 +563,7 @@ impl<'s> From<String> for StyledCow<'s> {
 
 impl<'s> From<StyledStr<'s>> for StyledCow<'s> {
     fn from(s: StyledStr<'s>) -> StyledCow<'s> {
-        StyledCow::new(s.s, s.style, None)
+        StyledCow::new(s.s, s.style, s.link.map(|s| s.to_owned()))
     }
 }
 

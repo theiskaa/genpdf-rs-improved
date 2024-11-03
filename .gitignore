@@ -18,6 +18,7 @@ Cargo.lock
 
 /target
 /Cargo.lock
+/target/
 
 
 # Added by cargo

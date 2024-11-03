@@ -153,6 +153,7 @@ fn split<'s>(
 pub struct Words<I: Iterator<Item = style::StyledString>> {
     iter: I,
     s: Option<style::StyledString>,
+    link: Option<String>,
 }
 
 impl<I: Iterator<Item = style::StyledString>> Words<I> {
@@ -163,6 +164,7 @@ impl<I: Iterator<Item = style::StyledString>> Words<I> {
         Words {
             iter: iter.into_iter(),
             s: None,
+            link: None,
         }
     }
 }
@@ -173,6 +175,9 @@ impl<I: Iterator<Item = style::StyledString>> Iterator for Words<I> {
     fn next(&mut self) -> Option<style::StyledString> {
         if self.s.as_ref().map(|s| s.s.is_empty()).unwrap_or(true) {
             self.s = self.iter.next();
+            if let Some(s) = &self.s {
+                self.link = s.link.clone();
+            }
         }
 
         if let Some(s) = &mut self.s {
@@ -180,7 +185,7 @@ impl<I: Iterator<Item = style::StyledString>> Iterator for Words<I> {
             let n = s.s.find(' ').map(|i| i + 1).unwrap_or_else(|| s.s.len());
             let mut tmp = s.s.split_off(n);
             mem::swap(&mut tmp, &mut s.s);
-            Some(style::StyledString::new(tmp, s.style, s.link.clone()))
+            Some(style::StyledString::new(tmp, s.style, self.link.clone()))
         } else {
             None
         }
