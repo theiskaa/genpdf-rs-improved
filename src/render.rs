@@ -669,6 +669,8 @@ pub struct TextSection<'f, 'p> {
     is_first: bool,
     metrics: fonts::Metrics,
     font: Option<(printpdf::IndirectFontRef, u8)>,
+    current_x_offset: Mm,
+    cumulative_kerning: Mm,
 }
 
 impl<'f, 'p> TextSection<'f, 'p> {
@@ -690,6 +692,8 @@ impl<'f, 'p> TextSection<'f, 'p> {
             is_first: true,
             metrics,
             font: None,
+            current_x_offset: Mm(0.0),
+            cumulative_kerning: Mm(0.0),
         })
     }
 
@@ -733,25 +737,20 @@ impl<'f, 'p> TextSection<'f, 'p> {
         let font = style.font(self.font_cache);
         let s = s.as_ref();
 
-        // Adjust cursor to remove left bearing of the first character of the first string
         if self.is_first {
-            let x_offset = if let Some(first_c) = s.chars().next() {
-                style.char_left_side_bearing(self.font_cache, first_c) * -1.0
-            } else {
-                Mm(0.0)
-            };
-            self.set_text_cursor(x_offset);
+            if let Some(first_c) = s.chars().next() {
+                let x_offset = style.char_left_side_bearing(self.font_cache, first_c) * -1.0;
+                self.set_text_cursor(x_offset);
+            }
+            self.is_first = false;
         }
-        self.is_first = false;
 
-        let positions = font
-            .kerning(self.font_cache, s.chars())
+        let kerning_positions = font.kerning(self.font_cache, s.chars());
+        let positions = kerning_positions
+            .clone()
             .into_iter()
-            // Kerning is measured in 1/1000 em
-            .map(|pos| pos * -1000.0)
-            .map(|pos| pos as i64);
+            .map(|pos| (pos * -1000.0) as i64);
         let codepoints = if font.is_builtin() {
-            // Built-in fonts always use the Windows-1252 encoding
             encode_win1252(s)?
         } else {
             font.glyph_ids(&self.font_cache, s.chars())
@@ -767,6 +766,11 @@ impl<'f, 'p> TextSection<'f, 'p> {
         self.area
             .layer
             .write_positioned_codepoints(positions, codepoints);
+
+        let kerning_sum = Mm(kerning_positions.iter().sum::<f32>());
+        self.cumulative_kerning += kerning_sum;
+        self.current_x_offset += style.text_width(self.font_cache, s);
+
         Ok(())
     }
 
@@ -779,56 +783,79 @@ impl<'f, 'p> TextSection<'f, 'p> {
         uri: impl AsRef<str>,
         style: Style,
     ) -> Result<(), Error> {
+        let font = style.font(self.font_cache);
         let text = text.as_ref();
         let uri = uri.as_ref();
 
-        // Calculate the width of the text
-        let font = style.font(self.font_cache);
-        let text_width = font.str_width(self.font_cache, text, style.font_size());
+        // Calculate kerning positions
+        let kerning_positions: Vec<f32> = font.kerning(self.font_cache, text.chars());
 
-        // Get the PDF font
+        // Get current cursor position, including all accumulated offsets
+        let current_pos = self.area.position(Position::new(
+            self.current_x_offset + self.cumulative_kerning,
+            0.0,
+        ));
+        let pdf_pos = self.area.layer.transform_position(current_pos);
+
+        // Calculate text width
+        let text_width = style.text_width(self.font_cache, text);
+
+        // Create annotation rectangle
+        let rect = printpdf::Rect::new(
+            printpdf::Mm(pdf_pos.x.0),                                     // left
+            printpdf::Mm(pdf_pos.y.0 - font.ascent(style.font_size()).0),  // bottom
+            printpdf::Mm(pdf_pos.x.0 + text_width.0),                      // right
+            printpdf::Mm(pdf_pos.y.0 + font.descent(style.font_size()).0), // top
+        );
+
+        // Create and add the link annotation
+        let annotation = printpdf::LinkAnnotation::new(
+            rect,
+            Some(printpdf::BorderArray::default()),
+            None,
+            printpdf::Actions::uri(uri.to_string()),
+            Some(printpdf::HighlightingMode::Invert),
+        );
+        self.area.layer.add_annotation(annotation);
+
+        // Handle first character positioning
+        if self.is_first {
+            if let Some(first_c) = text.chars().next() {
+                let x_offset = style.char_left_side_bearing(self.font_cache, first_c) * -1.0;
+                self.set_text_cursor(x_offset);
+            }
+            self.is_first = false;
+        }
+
+        // Convert kerning positions for text rendering
+        let positions = kerning_positions
+            .clone()
+            .into_iter()
+            .map(|pos| (pos * -1000.0) as i64);
+
+        let codepoints = if font.is_builtin() {
+            encode_win1252(text)?
+        } else {
+            font.glyph_ids(&self.font_cache, text.chars())
+        };
+
         let pdf_font = self
             .font_cache
             .get_pdf_font(font)
             .expect("Could not find PDF font in font cache");
 
-        // Calculate the correct positions for the text and annotation
-        let start_x = self.area.origin.x;
-        let start_y = self.area.origin.y + self.metrics.ascent;
-        let end_x = start_x + text_width;
-        let end_y = start_y - self.metrics.ascent;
+        self.area.layer.set_fill_color(style.color());
+        self.set_font(pdf_font, style.font_size());
 
-        // Use text directly on the layer
-        self.area.layer.data.layer.use_text(
-            text,
-            style.font_size() as f32,
-            printpdf::Mm(start_x.0),
-            printpdf::Mm(start_y.0),
-            pdf_font,
-        );
-
-        // Add the link annotation
-        let link_annotation = printpdf::LinkAnnotation::new(
-            printpdf::Rect::new(
-                printpdf::Mm(start_x.0),
-                printpdf::Mm(end_y.0),
-                printpdf::Mm(end_x.0),
-                printpdf::Mm(start_y.0),
-            ),
-            None,
-            None,
-            printpdf::Actions::uri(uri.to_string()),
-            None,
-        );
-
+        // Render the text
         self.area
             .layer
-            .data
-            .layer
-            .add_link_annotation(link_annotation);
+            .write_positioned_codepoints(positions, codepoints);
 
-        // Update the cursor position
-        self.area.origin.x += text_width;
+        // Update position tracking
+        let kerning_sum = Mm(kerning_positions.iter().sum::<f32>());
+        self.cumulative_kerning += kerning_sum;
+        self.current_x_offset += text_width;
 
         Ok(())
     }
