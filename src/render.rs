@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2020-2021 Robin Krahl <robin.krahl@ireas.org>
-// SPDX-License-Identifier: Apache-2.0 or MIT
-
 //! Low-level PDF rendering utilities.
 //!
 //! This module provides low-level abstractions over [`printpdf`][]:  A [`Renderer`][] creates a

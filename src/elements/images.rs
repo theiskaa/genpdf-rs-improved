@@ -1,8 +1,4 @@
-// SPDX-FileCopyrightText: 2020 Alexander Dean-Kennedy <dstar@slackless.com>
-// SPDX-FileCopyrightText: 2021 Robin Krahl <robin.krahl@ireas.org>
-// SPDX-License-Identifier: Apache-2.0 or MIT
-
-//! Image support for genpdf-rs.
+//! Image support for genpdfi-rs.
 
 use std::path;
 
@@ -32,11 +28,11 @@ use crate::{Alignment, Context, Element, Mm, Position, RenderResult, Rotation, S
 ///
 /// ```
 /// use std::convert::TryFrom;
-/// use genpdf::elements;
+/// use genpdfi::elements;
 /// let image = elements::Image::from_path("examples/images/test_image.jpg")
 ///       .expect("Failed to load test image")
-///       .with_alignment(genpdf::Alignment::Center) // Center the image on the page.
-///       .with_scale(genpdf::Scale::new(0.5, 2)); // Squeeze and then stretch upwards.
+///       .with_alignment(genpdfi::Alignment::Center) // Center the image on the page.
+///       .with_scale(genpdfi::Scale::new(0.5, 2)); // Squeeze and then stretch upwards.
 /// ```
 ///
 /// [`image`]: https://lib.rs/crates/image

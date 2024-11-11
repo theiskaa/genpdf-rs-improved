@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2020 Robin Krahl <robin.krahl@ireas.org>
-// SPDX-License-Identifier: Apache-2.0 or MIT
-
 //! Fonts, font families and a font cache.
 //!
 //! Before you can use a font in a PDF document, you have to load the [`FontData`][] for it, either
@@ -21,7 +18,7 @@
 //! viewers are expected to support.  You can choose between the two methods when loading the font
 //! ([`from_files`][], [`FontData::load`][], [`FontData::new`][]).
 //!
-//! If you choose a built-in font family, you still have to provide the font data so that `genpdf`
+//! If you choose a built-in font family, you still have to provide the font data so that `genpdfi`
 //! has access to its glyph metrics.  Note that it is sufficient to use a font that is metrically
 //! identical to the built-in font.  For example, you can use the Liberation fonts instad of the
 //! proprietary Helvetica, Times and Courier fonts.

@@ -1,14 +1,11 @@
-# SPDX-FileCopyrightText: 2020-2021 Robin Krahl <robin.krahl@ireas.org>
-# SPDX-License-Identifier: CC0-1.0
-
 [package]
-name = "genpdf"
-version = "0.2.0"
+name = "genpdfi"
+version = "0.2.1"
 authors = ["Robin Krahl <robin.krahl@ireas.org>", "Ismael Sh <me@theiskaa.com>"]
 edition = "2018"
 description = "User-friendly PDF generator written in pure Rust"
-homepage = "https://github.com/theiskaa/genpdf-rs-improved"
-repository = "https://github.com/theiskaa/genpdf-rs-improved"
+homepage = "https://github.com/theiskaa/genpdfi"
+repository = "https://github.com/theiskaa/genpdfi"
 keywords = ["pdf", "text", "layout"]
 categories = ["text-processing"]
 license = "Apache-2.0 OR MIT"

@@ -1,9 +1,6 @@
-// SPDX-FileCopyrightText: 2020-2021 Robin Krahl <robin.krahl@ireas.org>
-// SPDX-License-Identifier: Apache-2.0 or MIT
-
 //! User-friendly PDF generator written in pure Rust.
 //!
-//! `genpdf` is a high-level PDF generator built ontop of [`printpdf`][] and [`rusttype`][].  It
+//! `genpdfi` is a high-level PDF generator built ontop of [`printpdf`][] and [`rusttype`][].  It
 //! takes care of the page layout and text alignment and renders a document tree into a PDF
 //! document.  All of its dependencies are written in Rust, so you don’t need any pre-installed
 //! libraries or tools.
@@ -21,15 +18,13 @@ use std::fs;
 use std::io;
 use std::path;
 
-use derive_more::{
-    Add, AddAssign, Div, DivAssign, Into, Mul, MulAssign, Sub, SubAssign, Sum,
-};
+use derive_more::{Add, AddAssign, Div, DivAssign, Into, Mul, MulAssign, Sub, SubAssign, Sum};
 
 use error::Context as _;
 
 /// A length measured in millimeters.
 ///
-/// `genpdf` always uses millimeters as its length unit, except for the font size that is measured
+/// `genpdfi` always uses millimeters as its length unit, except for the font size that is measured
 /// in points.
 ///
 /// If you want to convert pixels or points into millimeters, you can use the [`printpdf::Pt`][]
@@ -155,7 +150,7 @@ impl Default for Alignment {
 
 /// A position on a PDF layer, measured in millimeters.
 ///
-/// All positions used by `genpdf` are measured from the top left corner of the reference area.
+/// All positions used by `genpdfi` are measured from the top left corner of the reference area.
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd, Add, AddAssign, Sub, SubAssign)]
 pub struct Position {
     /// The x coordinate of the position, measured from the left border of the reference area.
@@ -381,7 +376,7 @@ impl<T: Into<Mm>> From<T> for Margins {
 
 /// A PDF document.
 ///
-/// This struct is the entry point for the high-level `genpdf` API.  It stores a set of elements
+/// This struct is the entry point for the high-level `genpdfi` API.  It stores a set of elements
 /// and default style and layout settings.  Add elements to the document by calling the [`push`][]
 /// method and then render them to a PDF file using the [`render`][] and [`render_to_file`][]
 /// methods.
@@ -402,11 +397,11 @@ impl<T: Into<Mm>> From<T> for Margins {
 ///
 /// ```no_run
 /// // Load a font from the file system
-/// let font_family = genpdf::fonts::from_files("./fonts", "LiberationSans", None)
+/// let font_family = genpdfi::fonts::from_files("./fonts", "LiberationSans", None)
 ///     .expect("Failed to load font family");
 /// // Create a document and set the default font family
-/// let mut doc = genpdf::Document::new(font_family);
-/// doc.push(genpdf::elements::Paragraph::new("Document content"));
+/// let mut doc = genpdfi::Document::new(font_family);
+/// doc.push(genpdfi::elements::Paragraph::new("Document content"));
 /// doc.render_to_file("output.pdf").expect("Failed to render document");
 /// ```
 ///
@@ -756,7 +751,7 @@ pub trait Element {
     /// fitted in the area or not, the `size` field of the [`RenderResult`][] must always be set to
     /// the size of the area that has been used, starting at the origin of the provided area.
     ///
-    /// The following guarantuees are made by `genpdf`’s elements and must be followed by
+    /// The following guarantuees are made by `genpdfi`’s elements and must be followed by
     /// implementations of this trait:
     ///
     /// - There is only one rendering process per element instance.  This means that the first call

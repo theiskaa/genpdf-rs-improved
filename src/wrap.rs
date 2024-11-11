@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2020-2021 Robin Krahl <robin.krahl@ireas.org>
-// SPDX-License-Identifier: Apache-2.0 or MIT
-
 //! Utilities for text wrapping.
 
 use std::mem;
